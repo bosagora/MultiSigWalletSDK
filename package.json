@@ -1,0 +1,14 @@
+{
+  "name": "multisig-wallet-sdk",
+  "version": "1.0.0",
+  "description": "SDK for multi-signature wallet",
+  "repository": "https://github.com/bosagora/multisig-wallet-sdk",
+  "author": "BOSagora Foundation",
+  "license": "LGPL-3.0",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "packages/*"
+    ]
+  }
+}
