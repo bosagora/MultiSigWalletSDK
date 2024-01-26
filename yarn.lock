@@ -5631,10 +5631,10 @@ ms@^2.1.1:
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.1.3.tgz#574c8138ce1d2b5861f0b44579dbadd60c6615b2"
   integrity sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==
 
-multisig-wallet-contracts-lib@^1.0.4:
-  version "1.0.4"
-  resolved "https://registry.yarnpkg.com/multisig-wallet-contracts-lib/-/multisig-wallet-contracts-lib-1.0.4.tgz#ad87a920d7952c5d5bba60e692d3eed41bb223e1"
-  integrity sha512-T4KZuBZ6BroYTvDJtBW1CapPgsR0UU2D/yIouA8RBBFwrN584bN3ml0jYWS0YV2hrRPUfCz64is6SrIrgGzARQ==
+multisig-wallet-contracts-lib@^1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/multisig-wallet-contracts-lib/-/multisig-wallet-contracts-lib-1.0.6.tgz#cc70a604dda4ac847e188a89172a503f753f4be5"
+  integrity sha512-Wl0TkQn8yeI1Mo4CHziSnueqLl6TeYusIn4MHm6htawx4M0dZswoB48Bjc8ig445fXIe1Iy978OuSvPipBsBYw==
   dependencies:
     ethers "npm:boa-ethers2@^5.7.9"
 

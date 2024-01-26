@@ -22,6 +22,24 @@ describe("SDK Client", () => {
     let tokenContracts: MultiSigToken[] = [];
     let deployment: Deployment;
 
+    const walletInfos = [
+        {
+            name: "My Wallet 1",
+            description: "My first multi-sign wallet"
+        },
+        {
+            name: "My Wallet 2",
+            description: "My second multi-sign wallet"
+        },
+        {
+            name: "My Wallet 3",
+            description: "My third multi-sign wallet"
+        },
+        {
+            name: "Fund",
+            description: "Fund of develop"
+        }
+    ];
     let server: Server;
 
     beforeAll(async () => {
@@ -48,6 +66,8 @@ describe("SDK Client", () => {
     it("create", async () => {
         for (let idx = 0; idx < 3; idx++) {
             for await (const step of client.multiSigWalletFactory.create(
+                walletInfos[idx].name,
+                walletInfos[idx].description,
                 owners[idx].map((m) => m.address),
                 required
             )) {
@@ -85,11 +105,66 @@ describe("SDK Client", () => {
 
     it("Get wallet", async () => {
         const w1 = await client.multiSigWalletFactory.getWalletsForOwner(owner1.address, 0, 3);
-        assert.deepStrictEqual(w1, [walletAddresses[0], walletAddresses[1], walletAddresses[2]]);
+        assert.deepStrictEqual(
+            w1.map((m) => m.wallet),
+            [walletAddresses[0], walletAddresses[1], walletAddresses[2]]
+        );
         const w2 = await client.multiSigWalletFactory.getWalletsForOwner(owner2.address, 0, 2);
-        assert.deepStrictEqual(w2, [walletAddresses[0], walletAddresses[1]]);
+        assert.deepStrictEqual(
+            w2.map((m) => m.wallet),
+            [walletAddresses[0], walletAddresses[1]]
+        );
         const w3 = await client.multiSigWalletFactory.getWalletsForOwner(owner3.address, 0, 1);
-        assert.deepStrictEqual(w3, [walletAddresses[0]]);
+        assert.deepStrictEqual(
+            w3.map((m) => m.wallet),
+            [walletAddresses[0]]
+        );
+    });
+
+    it("getWalletInfo", async () => {
+        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
+        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
+        assert.deepStrictEqual(res.name, walletInfos[0].name);
+        assert.deepStrictEqual(res.description, walletInfos[0].description);
+    });
+
+    it("changeName", async () => {
+        for await (const step of client.multiSigWalletFactory.changeName(walletAddresses[0], walletInfos[3].name)) {
+            switch (step.key) {
+                case NormalSteps.SENT:
+                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
+                    break;
+                case NormalSteps.SUCCESS:
+                    break;
+                default:
+                    throw new Error("Unexpected step: " + JSON.stringify(step, null, 2));
+            }
+        }
+
+        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
+        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
+        assert.deepStrictEqual(res.name, walletInfos[3].name);
+    });
+
+    it("changeDescription", async () => {
+        for await (const step of client.multiSigWalletFactory.changeDescription(
+            walletAddresses[0],
+            walletInfos[3].description
+        )) {
+            switch (step.key) {
+                case NormalSteps.SENT:
+                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
+                    break;
+                case NormalSteps.SUCCESS:
+                    break;
+                default:
+                    throw new Error("Unexpected step: " + JSON.stringify(step, null, 2));
+            }
+        }
+
+        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
+        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
+        assert.deepStrictEqual(res.description, walletInfos[3].description);
     });
 
     it("transfer", async () => {

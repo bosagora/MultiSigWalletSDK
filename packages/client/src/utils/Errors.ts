@@ -12,7 +12,19 @@ export class NoWalletAddress extends Error {
 
 export class FailedCreateWallet extends Error {
     constructor() {
-        super("Failed to create a  multi sig wallet");
+        super("Failed to create a multi sig wallet");
+    }
+}
+
+export class FailedChangeName extends Error {
+    constructor() {
+        super("Failed to change the name of wallet");
+    }
+}
+
+export class FailedChangeDescription extends Error {
+    constructor() {
+        super("Failed to change the description of wallet");
     }
 }
 

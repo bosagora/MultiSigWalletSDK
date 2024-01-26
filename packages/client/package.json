@@ -1,6 +1,6 @@
 {
   "name": "multisig-wallet-sdk-client",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "author": "BOSagora Foundation",
   "license": "LGPL-3.0",
   "main": "dist/index.js",
@@ -72,7 +72,7 @@
     "@ethersproject/providers": "^5.7.0",
     "@ethersproject/random": "^5.7.0",
     "@ethersproject/wallet": "^5.7.0",
-    "multisig-wallet-contracts-lib": "^1.0.4",
+    "multisig-wallet-contracts-lib": "^1.0.6",
     "multisig-wallet-sdk-common": "^1.0.0"
   },
   "jest": {
