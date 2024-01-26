@@ -11,7 +11,7 @@ import {
 import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "multisig-wallet-sdk-common";
 import { MultiSigWallet, MultiSigWallet__factory } from "multisig-wallet-contracts-lib";
 
-import { ABIStorage, ContractUtils, GasPriceManager, NonceManager } from "../../utils/";
+import { ABIStorage, ContractUtils, FailedChangeDescription, GasPriceManager, NonceManager } from "../../utils/";
 import {
     FailedConfirmTransaction,
     FailedRevokeTransaction,
@@ -186,6 +186,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const nonceSigner = new NonceManager(new GasPriceManager(signer));
         const contract = this.getWalletContract(nonceSigner);
 
+        let success = true;
         try {
             const tx = await contract.submitTransaction(destination, value, data);
             yield {
@@ -206,11 +207,12 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
                     transactionId
                 };
             } else {
-                throw new FailedSubmitTransaction();
+                success = false;
             }
         } catch (error) {
-            throw new FailedSubmitTransaction();
+            success = false;
         }
+        if (!success) throw new FailedSubmitTransaction();
     }
 
     public async *confirmTransaction(transactionId: BigNumber): AsyncGenerator<ConfirmTransaction> {
@@ -230,6 +232,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const nonceSigner = new NonceManager(new GasPriceManager(signer));
         const contract = this.getWalletContract(nonceSigner);
 
+        let success = true;
         try {
             const tx = await contract.confirmTransaction(transactionId);
             yield {
@@ -253,15 +256,15 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
                         transactionId: txId
                     };
                 } else {
-                    throw new FailedConfirmTransaction();
+                    success = false;
                 }
             } else {
-                throw new FailedConfirmTransaction();
+                success = false;
             }
         } catch (error) {
-            console.log(error);
-            throw new FailedConfirmTransaction();
+            success = false;
         }
+        if (!success) throw new FailedConfirmTransaction();
     }
 
     public async *revokeConfirmation(transactionId: BigNumber): AsyncGenerator<RevokeTransaction> {
@@ -281,6 +284,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const nonceSigner = new NonceManager(new GasPriceManager(signer));
         const contract = this.getWalletContract(nonceSigner);
 
+        let success = true;
         try {
             const tx = await contract.revokeConfirmation(transactionId);
             yield {
@@ -301,11 +305,12 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
                     transactionId: txId
                 };
             } else {
-                throw new FailedRevokeTransaction();
+                success = false;
             }
         } catch (error) {
-            throw new FailedRevokeTransaction();
+            success = false;
         }
+        if (!success) throw new FailedRevokeTransaction();
     }
 
     public async getTransactionCountInCondition(pending: boolean, executed: boolean): Promise<number> {

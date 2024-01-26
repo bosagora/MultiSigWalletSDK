@@ -49,9 +49,26 @@ export type RevokeTransaction =
           transactionId: BigNumber;
       };
 
+export type ChangeInformation =
+    | {
+          key: NormalSteps.SENT;
+          txHash: BytesLike;
+      }
+    | {
+          key: NormalSteps.SUCCESS;
+      };
+
 export interface ContractTransactionData {
     destination: string;
     value: BigNumber;
     data: string;
     executed: boolean;
+}
+
+export interface ContractWalletInfo {
+    creator: string;
+    wallet: string;
+    name: string;
+    description: string;
+    time: BigNumber;
 }
