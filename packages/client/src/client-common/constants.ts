@@ -18,6 +18,6 @@ export const LIVE_CONTRACTS: { [K in SupportedNetworks]: NetworkDeployment } = {
         MultiSigWalletFactoryAddress: activeContractsList.bosagora_devnet.MultiSigWalletFactory
     },
     localhost: {
-        MultiSigWalletFactoryAddress: ""
+        MultiSigWalletFactoryAddress: activeContractsList.bosagora_devnet.MultiSigWalletFactory
     }
 };

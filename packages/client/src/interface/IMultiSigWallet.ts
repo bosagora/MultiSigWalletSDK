@@ -22,7 +22,13 @@ export interface IMultiSigWalletMethods extends IClientCore {
     getConfirmationCount: (transactionId: BigNumber) => Promise<number>;
     getConfirmations: (transactionId: BigNumber) => Promise<string[]>;
 
-    submitTransaction: (destination: string, value: BigNumberish, data: string) => AsyncGenerator<SubmitTransaction>;
+    submitTransaction: (
+        title: string,
+        description: string,
+        destination: string,
+        value: BigNumberish,
+        data: string
+    ) => AsyncGenerator<SubmitTransaction>;
     confirmTransaction: (transactionId: BigNumber) => AsyncGenerator<ConfirmTransaction>;
     revokeConfirmation: (transactionId: BigNumber) => AsyncGenerator<RevokeTransaction>;
 
@@ -34,17 +40,35 @@ export interface IMultiSigWalletMethods extends IClientCore {
         executed: boolean
     ) => Promise<BigNumber[]>;
 
-    submitTransactionAddOwner: (owner: string) => AsyncGenerator<SubmitTransaction>;
-    submitTransactionRemoveOwner: (owner: string) => AsyncGenerator<SubmitTransaction>;
-    submitTransactionReplaceOwner: (owner: string, newOwner: string) => AsyncGenerator<SubmitTransaction>;
+    submitTransactionAddOwner: (title: string, description: string, owner: string) => AsyncGenerator<SubmitTransaction>;
+    submitTransactionRemoveOwner: (
+        title: string,
+        description: string,
+        owner: string
+    ) => AsyncGenerator<SubmitTransaction>;
+    submitTransactionReplaceOwner: (
+        title: string,
+        description: string,
+        owner: string,
+        newOwner: string
+    ) => AsyncGenerator<SubmitTransaction>;
 
-    submitTransactionNativeTransfer: (to: string, amount: BigNumber) => AsyncGenerator<SubmitTransaction>;
+    submitTransactionNativeTransfer: (
+        title: string,
+        description: string,
+        to: string,
+        amount: BigNumber
+    ) => AsyncGenerator<SubmitTransaction>;
     submitTransactionTokenTransfer: (
+        title: string,
+        description: string,
         destination: string,
         to: string,
         amount: BigNumber
     ) => AsyncGenerator<SubmitTransaction>;
     submitTransactionTokenApprove: (
+        title: string,
+        description: string,
         destination: string,
         spender: string,
         amount: BigNumber

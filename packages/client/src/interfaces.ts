@@ -59,6 +59,8 @@ export type ChangeInformation =
       };
 
 export interface ContractTransactionData {
+    title: string;
+    description: string;
     destination: string;
     value: BigNumber;
     data: string;
