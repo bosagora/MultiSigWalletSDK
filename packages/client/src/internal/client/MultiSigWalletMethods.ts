@@ -108,6 +108,8 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const contract = this.getWalletContract(provider);
         const res = await contract.getTransaction(transactionId);
         return {
+            title: res.title,
+            description: res.description,
             destination: res.destination,
             value: res.value,
             data: res.data,
@@ -129,6 +131,8 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const res = await contract.getTransactionsInRange(from, to);
         return res.map((m) => {
             return {
+                title: m.title,
+                description: m.description,
                 destination: m.destination,
                 value: m.value,
                 data: m.data,
@@ -166,6 +170,8 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
     }
 
     public async *submitTransaction(
+        title: string,
+        description: string,
         destination: string,
         value: BigNumberish,
         data: string
@@ -188,7 +194,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
 
         let success = true;
         try {
-            const tx = await contract.submitTransaction(destination, value, data);
+            const tx = await contract.submitTransaction(title, description, destination, value, data);
             yield {
                 key: NormalSteps.SENT,
                 txHash: tx.hash
@@ -346,54 +352,76 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         return await contract.getTransactionIdsInCondition(from, to, pending, executed);
     }
 
-    public async *submitTransactionAddOwner(owner: string): AsyncGenerator<SubmitTransaction> {
+    public async *submitTransactionAddOwner(
+        title: string,
+        description: string,
+        owner: string
+    ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
         const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "addOwner", [owner]);
-        for await (const commit of this.submitTransaction(this.walletAddress, 0, encoded)) {
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }
     }
 
-    public async *submitTransactionRemoveOwner(owner: string): AsyncGenerator<SubmitTransaction> {
+    public async *submitTransactionRemoveOwner(
+        title: string,
+        description: string,
+        owner: string
+    ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
         const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "removeOwner", [owner]);
-        for await (const commit of this.submitTransaction(this.walletAddress, 0, encoded)) {
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }
     }
 
-    public async *submitTransactionReplaceOwner(owner: string, newOwner: string): AsyncGenerator<SubmitTransaction> {
+    public async *submitTransactionReplaceOwner(
+        title: string,
+        description: string,
+        owner: string,
+        newOwner: string
+    ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
         const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "replaceOwner", [owner, newOwner]);
-        for await (const commit of this.submitTransaction(this.walletAddress, 0, encoded)) {
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }
     }
 
-    public async *submitTransactionNativeTransfer(to: string, amount: BigNumber): AsyncGenerator<SubmitTransaction> {
-        for await (const commit of this.submitTransaction(to, amount, "0x")) {
+    public async *submitTransactionNativeTransfer(
+        title: string,
+        description: string,
+        to: string,
+        amount: BigNumber
+    ): AsyncGenerator<SubmitTransaction> {
+        for await (const commit of this.submitTransaction(title, description, to, amount, "0x")) {
             yield commit;
         }
     }
 
     public async *submitTransactionTokenTransfer(
+        title: string,
+        description: string,
         destination: string,
         to: string,
         amount: BigNumber
     ): AsyncGenerator<SubmitTransaction> {
         const encoded = ABIStorage.encodeFunctionData("MultiSigToken", "transfer", [to, amount]);
-        for await (const commit of this.submitTransaction(destination, 0, encoded)) {
+        for await (const commit of this.submitTransaction(title, description, destination, 0, encoded)) {
             yield commit;
         }
     }
 
     public async *submitTransactionTokenApprove(
+        title: string,
+        description: string,
         destination: string,
         spender: string,
         amount: BigNumber
     ): AsyncGenerator<SubmitTransaction> {
         const encoded = ABIStorage.encodeFunctionData("MultiSigToken", "approve", [spender, amount]);
-        for await (const commit of this.submitTransaction(destination, 0, encoded)) {
+        for await (const commit of this.submitTransaction(title, description, destination, 0, encoded)) {
             yield commit;
         }
     }

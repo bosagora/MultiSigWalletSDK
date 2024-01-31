@@ -176,7 +176,13 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[0]);
 
-        for await (const step of client.multiSigWallet.submitTransaction(tokenContracts[0].address, 0, encodedData)) {
+        for await (const step of client.multiSigWallet.submitTransaction(
+            "",
+            "",
+            tokenContracts[0].address,
+            0,
+            encodedData
+        )) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -222,7 +228,13 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[0]);
 
-        for await (const step of client.multiSigWallet.submitTransaction(tokenContracts[0].address, 0, encodedData)) {
+        for await (const step of client.multiSigWallet.submitTransaction(
+            "",
+            "",
+            tokenContracts[0].address,
+            0,
+            encodedData
+        )) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -264,7 +276,7 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionAddOwner(owner2.address)) {
+        for await (const step of client.multiSigWallet.submitTransactionAddOwner("", "", owner2.address)) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -311,7 +323,7 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionRemoveOwner(owner5.address)) {
+        for await (const step of client.multiSigWallet.submitTransactionRemoveOwner("", "", owner5.address)) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -357,7 +369,12 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionReplaceOwner(owner4.address, owner3.address)) {
+        for await (const step of client.multiSigWallet.submitTransactionReplaceOwner(
+            "",
+            "",
+            owner4.address,
+            owner3.address
+        )) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -414,7 +431,12 @@ describe("SDK Client", () => {
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionNativeTransfer(account.address, amount)) {
+        for await (const step of client.multiSigWallet.submitTransactionNativeTransfer(
+            "",
+            "",
+            account.address,
+            amount
+        )) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -460,6 +482,8 @@ describe("SDK Client", () => {
         client.multiSigWallet.attach(walletAddresses[2]);
 
         for await (const step of client.multiSigWallet.submitTransactionTokenTransfer(
+            "",
+            "",
             tokenContracts[2].address,
             account.address,
             amount
@@ -509,6 +533,8 @@ describe("SDK Client", () => {
         client.multiSigWallet.attach(walletAddresses[2]);
 
         for await (const step of client.multiSigWallet.submitTransactionTokenApprove(
+            "",
+            "",
             tokenContracts[2].address,
             account.address,
             amount
