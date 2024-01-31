@@ -1,4 +1,4 @@
-import { ClientCore, Context, SupportedNetworks, SupportedNetworksArray } from "../../client-common";
+import { ClientCore, Context, SupportedNetwork, SupportedNetworksArray } from "../../client-common";
 import { IMultiSigWalletFactoryMethods } from "../../interface/IMultiSigWalletFactory";
 import { NormalSteps, CreateMultiSigWallet, ContractWalletInfo, ChangeInformation } from "../../interfaces";
 import {
@@ -37,7 +37,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -83,7 +83,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -100,7 +100,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -126,7 +126,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -143,7 +143,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -169,7 +169,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -197,7 +197,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -241,7 +241,7 @@ export class MultiSigWalletFactoryMethods extends ClientCore implements IMultiSi
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }

@@ -1,4 +1,4 @@
-import { ClientCore, SupportedNetworks, SupportedNetworksArray } from "../../client-common";
+import { ClientCore, SupportedNetwork, SupportedNetworksArray } from "../../client-common";
 import { IMultiSigWalletMethods } from "../../interface/IMultiSigWallet";
 import {
     NormalSteps,
@@ -41,7 +41,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -56,7 +56,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -70,7 +70,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -84,7 +84,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -100,7 +100,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -122,7 +122,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -146,7 +146,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -160,7 +160,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -184,7 +184,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -230,7 +230,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -282,7 +282,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         }
 
         const network = getNetwork((await signer.provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -324,7 +324,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
@@ -343,7 +343,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!provider) throw new NoProviderError();
 
         const network = getNetwork((await provider.getNetwork()).chainId);
-        const networkName = network.name as SupportedNetworks;
+        const networkName = network.name as SupportedNetwork;
         if (!SupportedNetworksArray.includes(networkName)) {
             throw new UnsupportedNetworkError(networkName);
         }
