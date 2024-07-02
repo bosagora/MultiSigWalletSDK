@@ -1,5 +1,5 @@
 import { IClientCore } from "../client-common";
-import { ChangeInformation, ContractWalletInfo, CreateMultiSigWallet } from "../interfaces";
+import { CreateMultiSigWallet, QueryOption, WalletDetails } from "../interfaces";
 
 export interface IMultiSigWalletFactory {
     multiSigWalletFactory: IMultiSigWalletFactoryMethods;
@@ -10,16 +10,17 @@ export interface IMultiSigWalletFactoryMethods extends IClientCore {
     create: (
         name: string,
         description: string,
-        owners: string[],
-        required: number
+        members: string[],
+        required: number,
+        seed: number
     ) => AsyncGenerator<CreateMultiSigWallet>;
     getNumberOfWalletsForCreator: (creator: string) => Promise<number>;
-    getWalletsForCreator: (creator: string, from: number, to: number) => Promise<ContractWalletInfo[]>;
+    getWalletsForCreator: (creator: string, from: number, to: number) => Promise<WalletDetails[]>;
 
-    getNumberOfWalletsForOwner: (owner: string) => Promise<number>;
-    getWalletsForOwner: (owner: string, from: number, to: number) => Promise<ContractWalletInfo[]>;
+    getNumberOfWalletsForMember: (member: string) => Promise<number>;
+    getWalletsForMember: (member: string, from: number, to: number) => Promise<WalletDetails[]>;
 
-    getWalletInfo: (wallet: string) => Promise<ContractWalletInfo>;
-    changeName: (wallet: string, name: string) => AsyncGenerator<ChangeInformation>;
-    changeDescription: (wallet: string, description: string) => AsyncGenerator<ChangeInformation>;
+    getWalletDetail: (wallet: string) => Promise<WalletDetails>;
+
+    getWallets: (account: string, option: QueryOption) => Promise<WalletDetails[]>;
 }

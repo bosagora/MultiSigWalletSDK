@@ -3,7 +3,7 @@ import { GanacheServer } from "../helper/GanacheServer";
 import { contextParamsLocalChain } from "../helper/constants";
 import { BOACoin, ABIStorage, Client, Context, NormalSteps } from "../../src";
 import { ContractDeployer, Deployment } from "../helper/ContractDeployer";
-import { MultiSigToken } from "multisig-wallet-contracts-lib";
+import { TestMultiSigToken } from "multisig-wallet-contracts-lib";
 
 import { BigNumber } from "@ethersproject/bignumber";
 import { Wallet } from "@ethersproject/wallet";
@@ -19,7 +19,7 @@ describe("SDK Client", () => {
     ];
     const required = 2;
     const walletAddresses: string[] = [];
-    let tokenContracts: MultiSigToken[] = [];
+    let tokenContracts: TestMultiSigToken[] = [];
     let deployment: Deployment;
 
     const walletInfos = [
@@ -69,7 +69,8 @@ describe("SDK Client", () => {
                 walletInfos[idx].name,
                 walletInfos[idx].description,
                 owners[idx].map((m) => m.address),
-                required
+                required,
+                1
             )) {
                 switch (step.key) {
                     case NormalSteps.SENT:
@@ -95,76 +96,83 @@ describe("SDK Client", () => {
     });
 
     it("Get number of wallet", async () => {
-        const n1 = await client.multiSigWalletFactory.getNumberOfWalletsForOwner(owner1.address);
+        const n1 = await client.multiSigWalletFactory.getNumberOfWalletsForMember(owner1.address);
         assert.deepStrictEqual(n1, 3);
-        const n2 = await client.multiSigWalletFactory.getNumberOfWalletsForOwner(owner2.address);
+        const n2 = await client.multiSigWalletFactory.getNumberOfWalletsForMember(owner2.address);
         assert.deepStrictEqual(n2, 2);
-        const n3 = await client.multiSigWalletFactory.getNumberOfWalletsForOwner(owner3.address);
+        const n3 = await client.multiSigWalletFactory.getNumberOfWalletsForMember(owner3.address);
         assert.deepStrictEqual(n3, 1);
     });
 
     it("Get wallet", async () => {
-        const w1 = await client.multiSigWalletFactory.getWalletsForOwner(owner1.address, 0, 3);
+        const w1 = await client.multiSigWalletFactory.getWalletsForMember(owner1.address, 0, 3);
         assert.deepStrictEqual(
-            w1.map((m) => m.wallet),
+            w1.map((m) => m.address),
             [walletAddresses[0], walletAddresses[1], walletAddresses[2]]
         );
-        const w2 = await client.multiSigWalletFactory.getWalletsForOwner(owner2.address, 0, 2);
+        const w2 = await client.multiSigWalletFactory.getWalletsForMember(owner2.address, 0, 2);
         assert.deepStrictEqual(
-            w2.map((m) => m.wallet),
+            w2.map((m) => m.address),
             [walletAddresses[0], walletAddresses[1]]
         );
-        const w3 = await client.multiSigWalletFactory.getWalletsForOwner(owner3.address, 0, 1);
+        const w3 = await client.multiSigWalletFactory.getWalletsForMember(owner3.address, 0, 1);
         assert.deepStrictEqual(
-            w3.map((m) => m.wallet),
+            w3.map((m) => m.address),
             [walletAddresses[0]]
         );
     });
 
     it("getWalletInfo", async () => {
-        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
-        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
-        assert.deepStrictEqual(res.name, walletInfos[0].name);
-        assert.deepStrictEqual(res.description, walletInfos[0].description);
+        const res = await client.multiSigWalletFactory.getWalletDetail(walletAddresses[0]);
+        assert.deepStrictEqual(res.address, walletAddresses[0]);
+        assert.deepStrictEqual(res.metadata.name, walletInfos[0].name);
+        assert.deepStrictEqual(res.metadata.description, walletInfos[0].description);
     });
 
-    it("changeName", async () => {
-        for await (const step of client.multiSigWalletFactory.changeName(walletAddresses[0], walletInfos[3].name)) {
-            switch (step.key) {
-                case NormalSteps.SENT:
-                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
-                    break;
-                case NormalSteps.SUCCESS:
-                    break;
-                default:
-                    throw new Error("Unexpected step: " + JSON.stringify(step, null, 2));
-            }
-        }
-
-        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
-        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
-        assert.deepStrictEqual(res.name, walletInfos[3].name);
-    });
-
-    it("changeDescription", async () => {
-        for await (const step of client.multiSigWalletFactory.changeDescription(
-            walletAddresses[0],
-            walletInfos[3].description
+    it("initial mint", async () => {
+        const amount = BigNumber.from("10000000000").mul(BigNumber.from(10).pow(BigNumber.from(18)));
+        const encodedData = ABIStorage.encodeFunctionData("MultiSigToken", "mint", [amount]);
+        let transactionId: BigNumber = BigNumber.from(-1);
+        client.multiSigWallet.web3.useSigner(owner1);
+        client.multiSigWallet.attach(walletAddresses[0]);
+        for await (const step of client.multiSigWallet.submitTransaction(
+            "",
+            "",
+            tokenContracts[0].address,
+            0,
+            encodedData
         )) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
                     break;
                 case NormalSteps.SUCCESS:
+                    transactionId = step.transactionId;
                     break;
                 default:
                     throw new Error("Unexpected step: " + JSON.stringify(step, null, 2));
             }
         }
+        assert.ok(transactionId !== undefined);
 
-        const res = await client.multiSigWalletFactory.getWalletInfo(walletAddresses[0]);
-        assert.deepStrictEqual(res.wallet, walletAddresses[0]);
-        assert.deepStrictEqual(res.description, walletInfos[3].description);
+        let executedTransactionId: BigNumber = BigNumber.from(-1);
+        client.multiSigWallet.web3.useSigner(owner2);
+        for await (const step of client.multiSigWallet.confirmTransaction(transactionId)) {
+            switch (step.key) {
+                case NormalSteps.SENT:
+                    expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
+                    break;
+                case NormalSteps.SUCCESS:
+                    executedTransactionId = step.transactionId;
+                    break;
+                default:
+                    throw new Error("Unexpected step: " + JSON.stringify(step, null, 2));
+            }
+        }
+        assert.ok(executedTransactionId !== undefined);
+
+        // Check that transaction has been executed
+        assert.deepStrictEqual(transactionId, executedTransactionId);
     });
 
     it("transfer", async () => {
@@ -220,9 +228,11 @@ describe("SDK Client", () => {
     });
 
     it("mint", async () => {
+        const oldBalance = await tokenContracts[0].balanceOf(walletAddresses[0])
+
         const amount = BigNumber.from(100).mul(BigNumber.from(10).pow(BigNumber.from(18)));
 
-        const encodedData = ABIStorage.encodeFunctionData("MultiSigToken", "mint", [user2.address, amount]);
+        const encodedData = ABIStorage.encodeFunctionData("MultiSigToken", "mint", [amount]);
 
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
@@ -267,16 +277,17 @@ describe("SDK Client", () => {
         // Check that transaction has been executed
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
+        const newBalance = await tokenContracts[0].balanceOf(walletAddresses[0])
         // Check balance of target
-        assert.deepStrictEqual(await tokenContracts[0].balanceOf(user2.address), amount);
+        assert.deepStrictEqual(newBalance.sub(oldBalance), amount);
     });
 
-    it("addOwner", async () => {
+    it("addMember", async () => {
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionAddOwner("", "", owner2.address)) {
+        for await (const step of client.multiSigWallet.submitTransactionAddMember("", "", owner2.address)) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -310,7 +321,7 @@ describe("SDK Client", () => {
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
         // Check balance of target
-        assert.deepStrictEqual(await client.multiSigWallet.getOwners(), [
+        assert.deepStrictEqual(await client.multiSigWallet.getMembers(), [
             owner1.address,
             owner4.address,
             owner5.address,
@@ -318,12 +329,12 @@ describe("SDK Client", () => {
         ]);
     });
 
-    it("removeOwner", async () => {
+    it("removeMember", async () => {
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionRemoveOwner("", "", owner5.address)) {
+        for await (const step of client.multiSigWallet.submitTransactionRemoveMember("", "", owner5.address)) {
             switch (step.key) {
                 case NormalSteps.SENT:
                     expect(step.txHash).toMatch(/^0x[A-Fa-f0-9]{64}$/i);
@@ -357,19 +368,19 @@ describe("SDK Client", () => {
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
         // Check balance of target
-        assert.deepStrictEqual(await client.multiSigWallet.getOwners(), [
+        assert.deepStrictEqual(await client.multiSigWallet.getMembers(), [
             owner1.address,
             owner4.address,
             owner2.address
         ]);
     });
 
-    it("replaceOwner", async () => {
+    it("replaceMember", async () => {
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
         client.multiSigWallet.attach(walletAddresses[2]);
 
-        for await (const step of client.multiSigWallet.submitTransactionReplaceOwner(
+        for await (const step of client.multiSigWallet.submitTransactionReplaceMember(
             "",
             "",
             owner4.address,
@@ -408,7 +419,7 @@ describe("SDK Client", () => {
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
         // Check balance of target
-        assert.deepStrictEqual(await client.multiSigWallet.getOwners(), [
+        assert.deepStrictEqual(await client.multiSigWallet.getMembers(), [
             owner1.address,
             owner3.address,
             owner2.address
@@ -418,10 +429,10 @@ describe("SDK Client", () => {
     it("transfer BOA", async () => {
         const deposit = BOACoin.make("100").value;
         await deployer.sendTransaction({
-            to: walletAddresses[2],
+            to: walletAddresses[0],
             value: deposit
         });
-        assert.deepStrictEqual(await deployment.provider.getBalance(walletAddresses[2]), deposit);
+        assert.deepStrictEqual(await deployment.provider.getBalance(walletAddresses[0]), deposit);
 
         const account = Wallet.createRandom();
         const amount = BOACoin.make("1").value;
@@ -429,7 +440,7 @@ describe("SDK Client", () => {
 
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
-        client.multiSigWallet.attach(walletAddresses[2]);
+        client.multiSigWallet.attach(walletAddresses[0]);
 
         for await (const step of client.multiSigWallet.submitTransactionNativeTransfer(
             "",
@@ -475,16 +486,16 @@ describe("SDK Client", () => {
     it("transfer token", async () => {
         const account = Wallet.createRandom();
         const amount = BOACoin.make("1").value;
-        assert.deepStrictEqual(await tokenContracts[2].balanceOf(account.address), BigNumber.from(0));
+        assert.deepStrictEqual(await tokenContracts[0].balanceOf(account.address), BigNumber.from(0));
 
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
-        client.multiSigWallet.attach(walletAddresses[2]);
+        client.multiSigWallet.attach(walletAddresses[0]);
 
         for await (const step of client.multiSigWallet.submitTransactionTokenTransfer(
             "",
             "",
-            tokenContracts[2].address,
+            tokenContracts[0].address,
             account.address,
             amount
         )) {
@@ -520,22 +531,22 @@ describe("SDK Client", () => {
         // Check that transaction has been executed
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
-        assert.deepStrictEqual(await tokenContracts[2].balanceOf(account.address), amount);
+        assert.deepStrictEqual(await tokenContracts[0].balanceOf(account.address), amount);
     });
 
     it("approve token", async () => {
         const account = Wallet.createRandom();
         const amount = BOACoin.make("1").value;
-        assert.deepStrictEqual(await tokenContracts[2].balanceOf(account.address), BigNumber.from(0));
+        assert.deepStrictEqual(await tokenContracts[0].balanceOf(account.address), BigNumber.from(0));
 
         let transactionId: BigNumber = BigNumber.from(-1);
         client.multiSigWallet.web3.useSigner(owner1);
-        client.multiSigWallet.attach(walletAddresses[2]);
+        client.multiSigWallet.attach(walletAddresses[0]);
 
         for await (const step of client.multiSigWallet.submitTransactionTokenApprove(
             "",
             "",
-            tokenContracts[2].address,
+            tokenContracts[0].address,
             account.address,
             amount
         )) {
@@ -571,6 +582,6 @@ describe("SDK Client", () => {
         // Check that transaction has been executed
         assert.deepStrictEqual(transactionId, executedTransactionId);
 
-        assert.deepStrictEqual(await tokenContracts[2].allowance(walletAddresses[2], account.address), amount);
+        assert.deepStrictEqual(await tokenContracts[0].allowance(walletAddresses[0], account.address), amount);
     });
 });

@@ -10,7 +10,7 @@ export interface IMultiSigWallet {
 /** Defines the shape of the general purpose Client class */
 export interface IMultiSigWalletMethods extends IClientCore {
     attach: (walletAddress: string) => void;
-    getOwners: () => Promise<string[]>;
+    getMembers: () => Promise<string[]>;
     getRequired: () => Promise<number>;
 
     isOwner: (account: string) => Promise<boolean>;
@@ -32,7 +32,7 @@ export interface IMultiSigWalletMethods extends IClientCore {
     confirmTransaction: (transactionId: BigNumber) => AsyncGenerator<ConfirmTransaction>;
     revokeConfirmation: (transactionId: BigNumber) => AsyncGenerator<RevokeTransaction>;
 
-    getTransactionCountInCondition: (pending: boolean, executed: boolean) => Promise<number>;
+    getTransactionCountInCondition: (from: number, to: number, pending: boolean, executed: boolean) => Promise<number>;
     getTransactionIdsInCondition: (
         from: number,
         to: number,
@@ -40,17 +40,41 @@ export interface IMultiSigWalletMethods extends IClientCore {
         executed: boolean
     ) => Promise<BigNumber[]>;
 
-    submitTransactionAddOwner: (title: string, description: string, owner: string) => AsyncGenerator<SubmitTransaction>;
-    submitTransactionRemoveOwner: (
+    submitTransactionAddMember: (
         title: string,
         description: string,
         owner: string
     ) => AsyncGenerator<SubmitTransaction>;
-    submitTransactionReplaceOwner: (
+    submitTransactionRemoveMember: (
+        title: string,
+        description: string,
+        owner: string
+    ) => AsyncGenerator<SubmitTransaction>;
+    submitTransactionReplaceMember: (
         title: string,
         description: string,
         owner: string,
         newOwner: string
+    ) => AsyncGenerator<SubmitTransaction>;
+
+    submitTransactionChangeMember: (
+        title: string,
+        description: string,
+        additionalMembers: string[],
+        removalMembers: string[]
+    ) => AsyncGenerator<SubmitTransaction>;
+
+    submitTransactionChangeRequirement: (
+        title: string,
+        description: string,
+        required: number
+    ) => AsyncGenerator<SubmitTransaction>;
+
+    submitTransactionChangeMetadata: (
+        title: string,
+        description: string,
+        walletName: string,
+        walletDescription: string
     ) => AsyncGenerator<SubmitTransaction>;
 
     submitTransactionNativeTransfer: (

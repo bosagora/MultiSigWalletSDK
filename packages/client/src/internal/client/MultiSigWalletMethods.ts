@@ -11,7 +11,7 @@ import {
 import { NoProviderError, NoSignerError, UnsupportedNetworkError } from "multisig-wallet-sdk-common";
 import { MultiSigWallet, MultiSigWallet__factory } from "multisig-wallet-contracts-lib";
 
-import { ABIStorage, ContractUtils, FailedChangeDescription, GasPriceManager, NonceManager } from "../../utils/";
+import { ABIStorage, ContractUtils } from "../../utils/";
 import {
     FailedConfirmTransaction,
     FailedRevokeTransaction,
@@ -20,7 +20,7 @@ import {
 } from "../../utils";
 
 import { Signer } from "@ethersproject/abstract-signer";
-import { getNetwork } from "@ethersproject/networks";
+import { getNetwork } from "../../utils/Utilty";
 import { Provider } from "@ethersproject/providers";
 import { BigNumber, BigNumberish } from "@ethersproject/bignumber";
 
@@ -36,7 +36,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         return MultiSigWallet__factory.connect(this.walletAddress, signerOrProvider);
     }
 
-    public async getOwners(): Promise<string[]> {
+    public async getMembers(): Promise<string[]> {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
@@ -48,7 +48,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
 
         const contract = this.getWalletContract(provider);
 
-        return await contract.getOwners();
+        return await contract.getMembers();
     }
 
     public async getRequired(): Promise<number> {
@@ -108,12 +108,16 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const contract = this.getWalletContract(provider);
         const res = await contract.getTransaction(transactionId);
         return {
+            id: res.id,
             title: res.title,
             description: res.description,
+            creator: res.creator,
+            createdTime: res.createdTime,
             destination: res.destination,
             value: res.value,
             data: res.data,
-            executed: res.executed
+            executed: res.executed,
+            approval: res.approval
         };
     }
 
@@ -131,12 +135,16 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         const res = await contract.getTransactionsInRange(from, to);
         return res.map((m) => {
             return {
+                id: m.id,
                 title: m.title,
                 description: m.description,
+                creator: m.creator,
+                createdTime: m.createdTime,
                 destination: m.destination,
                 value: m.value,
                 data: m.data,
-                executed: m.executed
+                executed: m.executed,
+                approval: m.approval
             };
         });
     }
@@ -189,8 +197,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
             throw new UnsupportedNetworkError(networkName);
         }
 
-        const nonceSigner = new NonceManager(new GasPriceManager(signer));
-        const contract = this.getWalletContract(nonceSigner);
+        const contract = this.getWalletContract(signer);
 
         let success = true;
         try {
@@ -235,8 +242,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
             throw new UnsupportedNetworkError(networkName);
         }
 
-        const nonceSigner = new NonceManager(new GasPriceManager(signer));
-        const contract = this.getWalletContract(nonceSigner);
+        const contract = this.getWalletContract(signer);
 
         let success = true;
         try {
@@ -287,8 +293,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
             throw new UnsupportedNetworkError(networkName);
         }
 
-        const nonceSigner = new NonceManager(new GasPriceManager(signer));
-        const contract = this.getWalletContract(nonceSigner);
+        const contract = this.getWalletContract(signer);
 
         let success = true;
         try {
@@ -319,7 +324,12 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         if (!success) throw new FailedRevokeTransaction();
     }
 
-    public async getTransactionCountInCondition(pending: boolean, executed: boolean): Promise<number> {
+    public async getTransactionCountInCondition(
+        from: number,
+        to: number,
+        pending: boolean,
+        executed: boolean
+    ): Promise<number> {
         const provider = this.web3.getProvider() as Provider;
         if (!provider) throw new NoProviderError();
 
@@ -330,7 +340,7 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         }
 
         const contract = this.getWalletContract(provider);
-        return (await contract.getTransactionCountInCondition(pending, executed)).toNumber();
+        return (await contract.getTransactionCountInCondition(from, to, pending, executed)).toNumber();
     }
 
     public async getTransactionIdsInCondition(
@@ -352,38 +362,82 @@ export class MultiSigWalletMethods extends ClientCore implements IMultiSigWallet
         return await contract.getTransactionIdsInCondition(from, to, pending, executed);
     }
 
-    public async *submitTransactionAddOwner(
+    public async *submitTransactionAddMember(
         title: string,
         description: string,
         owner: string
     ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
-        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "addOwner", [owner]);
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "addMember", [owner]);
         for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }
     }
 
-    public async *submitTransactionRemoveOwner(
+    public async *submitTransactionRemoveMember(
         title: string,
         description: string,
         owner: string
     ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
-        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "removeOwner", [owner]);
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "removeMember", [owner]);
         for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }
     }
 
-    public async *submitTransactionReplaceOwner(
+    public async *submitTransactionReplaceMember(
         title: string,
         description: string,
         owner: string,
         newOwner: string
     ): AsyncGenerator<SubmitTransaction> {
         if (this.walletAddress === undefined) throw new NoWalletAddress();
-        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "replaceOwner", [owner, newOwner]);
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "replaceMember", [owner, newOwner]);
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
+            yield commit;
+        }
+    }
+
+    public async *submitTransactionChangeMember(
+        title: string,
+        description: string,
+        additionalMembers: string[],
+        removalMembers: string[]
+    ): AsyncGenerator<SubmitTransaction> {
+        if (this.walletAddress === undefined) throw new NoWalletAddress();
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "changeMember", [
+            additionalMembers,
+            removalMembers
+        ]);
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
+            yield commit;
+        }
+    }
+
+    public async *submitTransactionChangeRequirement(
+        title: string,
+        description: string,
+        required: number
+    ): AsyncGenerator<SubmitTransaction> {
+        if (this.walletAddress === undefined) throw new NoWalletAddress();
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "changeRequirement", [required]);
+        for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
+            yield commit;
+        }
+    }
+
+    public async *submitTransactionChangeMetadata(
+        title: string,
+        description: string,
+        walletName: string,
+        walletDescription: string
+    ): AsyncGenerator<SubmitTransaction> {
+        if (this.walletAddress === undefined) throw new NoWalletAddress();
+        const encoded = ABIStorage.encodeFunctionData("MultiSigWallet", "changeMetadata", [
+            walletName,
+            walletDescription
+        ]);
         for await (const commit of this.submitTransaction(title, description, this.walletAddress, 0, encoded)) {
             yield commit;
         }

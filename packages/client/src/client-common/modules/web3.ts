@@ -2,10 +2,12 @@ import { Wallet } from "@ethersproject/wallet";
 import { JsonRpcProvider } from "@ethersproject/providers";
 import { Contract, ContractInterface } from "@ethersproject/contracts";
 import { Signer } from "@ethersproject/abstract-signer";
+import { GasFeeEstimation } from "../../client-common/interfaces/common";
 import { IClientWeb3Core } from "../interfaces/core";
 import { Context } from "../context";
 import { NoWalletFactoryAddress } from "../../utils/Errors";
 
+const gasFeeEstimationFactorMap = new Map<Web3Module, number>();
 const providersMap = new Map<Web3Module, JsonRpcProvider[]>();
 const providerIdxMap = new Map<Web3Module, number>();
 const signerMap = new Map<Web3Module, Signer>();
@@ -13,6 +15,8 @@ const signerMap = new Map<Web3Module, Signer>();
 const walletFactoryAddressMap = new Map<Web3Module, string>();
 
 export class Web3Module implements IClientWeb3Core {
+    private static readonly PRECISION_FACTOR_BASE = 1000;
+
     constructor(context: Context) {
         providerIdxMap.set(this, -1);
         // Storing client data in the private module's scope to prevent external mutation
@@ -29,12 +33,19 @@ export class Web3Module implements IClientWeb3Core {
             walletFactoryAddressMap.set(this, context.walletFactoryAddress);
         }
 
+        if (context.gasFeeEstimationFactor) {
+            gasFeeEstimationFactorMap.set(this, context.gasFeeEstimationFactor);
+        }
         Object.freeze(Web3Module.prototype);
         Object.freeze(this);
     }
 
     private get walletFactoryAddress(): string {
         return walletFactoryAddressMap.get(this) || "";
+    }
+
+    private get gasFeeEstimationFactor(): number {
+        return gasFeeEstimationFactorMap.get(this) || 1;
     }
 
     private get providers(): JsonRpcProvider[] {
@@ -147,6 +158,30 @@ export class Web3Module implements IClientWeb3Core {
         }
 
         return contract.connect(signer) as Contract & T;
+    }
+
+    /** Calculates the expected maximum gas fee */
+    public getMaxFeePerGas(): Promise<bigint> {
+        return this.getConnectedSigner()
+            .getFeeData()
+            .then((feeData) => {
+                if (!feeData.maxFeePerGas) {
+                    return Promise.reject(new Error("Cannot estimate gas"));
+                }
+                return feeData.maxFeePerGas.toBigInt();
+            });
+    }
+
+    public getApproximateGasFee(estimatedFee: bigint): Promise<GasFeeEstimation> {
+        return this.getMaxFeePerGas().then((maxFeePerGas) => {
+            const max = estimatedFee * maxFeePerGas;
+
+            const factor = this.gasFeeEstimationFactor * Web3Module.PRECISION_FACTOR_BASE;
+
+            const average = (max * BigInt(Math.trunc(factor))) / BigInt(Web3Module.PRECISION_FACTOR_BASE);
+
+            return { average, max };
+        });
     }
 
     public getWalletFactoryAddress(): string {

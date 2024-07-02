@@ -4,8 +4,8 @@ import { LIVE_CONTRACTS } from "../../src";
 import { contextParamsLocalChain } from "./constants";
 
 import {
-    MultiSigToken,
-    MultiSigToken__factory,
+    TestMultiSigToken,
+    TestMultiSigToken__factory,
     MultiSigWalletFactory,
     MultiSigWalletFactory__factory
 } from "multisig-wallet-contracts-lib";
@@ -46,9 +46,9 @@ export class ContractDeployer {
         }
     }
 
-    public static async deployToken(deployer: Wallet, owner: string): Promise<MultiSigToken> {
-        const factory = new ContractFactory(MultiSigToken__factory.abi, MultiSigToken__factory.bytecode);
-        const contract = (await factory.connect(deployer).deploy(owner)) as MultiSigToken;
+    public static async deployToken(deployer: Wallet, owner: string): Promise<TestMultiSigToken> {
+        const factory = new ContractFactory(TestMultiSigToken__factory.abi, TestMultiSigToken__factory.bytecode);
+        const contract = (await factory.connect(deployer).deploy(owner)) as TestMultiSigToken;
         await contract.deployed();
         await contract.deployTransaction.wait();
         return contract;

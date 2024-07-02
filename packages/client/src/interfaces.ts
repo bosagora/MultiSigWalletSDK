@@ -10,7 +10,7 @@ export type CreateMultiSigWallet =
     | {
           key: NormalSteps.SENT;
           creator: string;
-          owners: string[];
+          members: string[];
           required: number;
           txHash: BytesLike;
       }
@@ -58,19 +58,53 @@ export type ChangeInformation =
           key: NormalSteps.SUCCESS;
       };
 
-export interface ContractTransactionData {
+export type ContractTransactionData = {
+    id: BigNumber;
     title: string;
     description: string;
+    creator: string;
+    createdTime: BigNumber;
     destination: string;
     value: BigNumber;
     data: string;
     executed: boolean;
-}
+    approval: string[];
+};
 
-export interface ContractWalletInfo {
+export type ContractWalletInfo = {
     creator: string;
     wallet: string;
     name: string;
     description: string;
-    time: BigNumber;
+    createdTime: BigNumber;
+    chain: number;
+};
+
+export type WalletMetadata = {
+    name: string;
+    description: string;
+};
+
+export type WalletDetails = {
+    address: string;
+    metadata: WalletMetadata;
+    creationDate: Date;
+    chain: number;
+};
+
+export type Pagination = {
+    skip?: number;
+    limit?: number;
+    direction?: SortDirection;
+};
+
+export enum SortDirection {
+    ASC = "asc",
+    DESC = "desc"
 }
+
+export type QueryOption = {
+    limit: number;
+    skip: number;
+    direction: SortDirection;
+};
